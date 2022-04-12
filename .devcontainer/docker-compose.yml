@@ -4,12 +4,13 @@ services:
 
   nats-streaming:
     image: library/nats-streaming:latest
+    container_name: nats-striaming-${APP_NAME}
     ports:
       - 4222:${N1_PORT}
       - 8222:${N2_PORT}
 
   postgres:
-    image: library/postgres:12.5-alpine
+    image: library/postgres:latest
     container_name: postgres-${APP_NAME}
     ports:
       - 5432:${DB_PORT}

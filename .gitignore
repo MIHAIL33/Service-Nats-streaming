@@ -1,2 +1,3 @@
 # Environment file
 /.devcontainer/.env
+.env
