@@ -3,7 +3,7 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"errors"
+	"github.com/sirupsen/logrus"
 )
 
 // type Model struct {
@@ -12,51 +12,51 @@ import (
 // }
 
 type Model struct {
-	Order_uid    string `json:"order_uid"`
-	Track_number string `json:"track_number"`
-	Entry        string `json:"entry"`
+	Order_uid    string `json:"order_uid" binding:"required"`
+	Track_number string `json:"track_number" binding:"required"`
+	Entry        string `json:"entry" binding:"required"`
 	Delivery     struct {
-		Name    string `json:"name"`
-		Phone   string `json:"phone"`
-		Zip     string `json:"zip"`
-		City    string `json:"city"`
-		Address string `json:"address"`
-		Region  string `json:"region"`
-		Email   string `json:"email"`
-	} `json:"delivery"`
+		Name    string `json:"name" binding:"required"`
+		Phone   string `json:"phone" binding:"required"`
+		Zip     string `json:"zip" binding:"required"`
+		City    string `json:"city" binding:"required"`
+		Address string `json:"address" binding:"required"`
+		Region  string `json:"region" binding:"required"`
+		Email   string `json:"email" binding:"required"`
+	} `json:"delivery" binding:"required" binding:"required"`
 	Payment struct {
-		Transaction   string `json:"transaction"`
+		Transaction   string `json:"transaction" binding:"required"`
 		Request_id    string `json:"request_id"`
-		Currency      string `json:"currency"`
-		Provider      string `json:"provider"`
-		Amount        int    `json:"amount"`
-		Payment_dt    int    `json:"payment_dt"`
-		Bank          string `json:"bank"`
-		Delivery_cost int    `json:"delivery_cost"`
-		Goods_total   int    `json:"goods_total"`
+		Currency      string `json:"currency" binding:"required"`
+		Provider      string `json:"provider" binding:"required"`
+		Amount        int    `json:"amount" binding:"required"`
+		Payment_dt    int    `json:"payment_dt" binding:"required"`
+		Bank          string `json:"bank" binding:"required"`
+		Delivery_cost int    `json:"delivery_cost" binding:"required"`
+		Goods_total   int    `json:"goods_total" binding:"required"`
 		Custom_fee    int    `json:"custom_fee"`
-	} `json:"payment"`
+	} `json:"payment" binding:"required"`
 	Items []struct {
-		Chrt_id      int    `json:"chrt_id"`
-		Track_number string `json:"track_number"`
-		Price        int    `json:"price"`
-		Rid          string `json:"rid"`
-		Name         string `json:"name"`
-		Sale         int    `json:"sale"`
-		Size         string `json:"size"`
-		Total_price  int    `json:"total_price"`
-		Nm_id        int    `json:"nm_id"`
-		Brand        string `json:"brand"`
-		Status       int    `json:"status"`
-	} `json:"items"`
-	Locale             string `json:"locale"`
+		Chrt_id      int    `json:"chrt_id" binding:"required"`
+		Track_number string `json:"track_number" binding:"required"`
+		Price        int    `json:"price" binding:"required"`
+		Rid          string `json:"rid" binding:"required"`
+		Name         string `json:"name" binding:"required"`
+		Sale         int    `json:"sale" binding:"required"`
+		Size         string `json:"size" binding:"required"`
+		Total_price  int    `json:"total_price" binding:"required"`
+		Nm_id        int    `json:"nm_id" binding:"required"`
+		Brand        string `json:"brand" binding:"required"`
+		Status       int    `json:"status" binding:"required"`
+	} `json:"items" binding:"required"`
+	Locale             string `json:"locale" binding:"required"`
 	Internal_signature string `json:"internal_signature"`
-	Customer_id        string `json:"customer_id"`
-	Delivery_service   string `json:"delivery_service"`
-	Shardkey           string `json:"shardkey"`
-	Sm_id              int    `json:"sm_id"`
-	Date_created       string `json:"date_created"`
-	Oof_shard          string `json:"oof_shard"`
+	Customer_id        string `json:"customer_id" binding:"required"`
+	Delivery_service   string `json:"delivery_service" binding:"required"`
+	Shardkey           string `json:"shardkey" binding:"required"`
+	Sm_id              int    `json:"sm_id" binding:"required"`
+	Date_created       string `json:"date_created" binding:"required"`
+	Oof_shard          string `json:"oof_shard" binding:"required"`
 }
 
 func (m *Model) Value() (driver.Value, error) {
@@ -64,9 +64,9 @@ func (m *Model) Value() (driver.Value, error) {
 }
 
 func (m *Model) Scan(value interface{}) error {
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
+	b, err := value.([]byte)
+	if !err {
+		logrus.Fatalf("type assertion to []byte failed")
 	}
 	return json.Unmarshal(b, &m)
 }
