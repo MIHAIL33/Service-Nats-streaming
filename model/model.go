@@ -1,4 +1,10 @@
-package app
+package models
+
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+)
 
 // type Model struct {
 // 	Id    int
@@ -9,15 +15,15 @@ type Model struct {
 	Order_uid    string `json:"order_uid"`
 	Track_number string `json:"track_number"`
 	Entry        string `json:"entry"`
-	Delivary     struct {
-		Name    string `json:"delivery"`
+	Delivery     struct {
+		Name    string `json:"name"`
 		Phone   string `json:"phone"`
 		Zip     string `json:"zip"`
 		City    string `json:"city"`
 		Address string `json:"address"`
 		Region  string `json:"region"`
 		Email   string `json:"email"`
-	} `json:"delivary"`
+	} `json:"delivery"`
 	Payment struct {
 		Transaction   string `json:"transaction"`
 		Request_id    string `json:"request_id"`
@@ -51,4 +57,16 @@ type Model struct {
 	Sm_id              int    `json:"sm_id"`
 	Date_created       string `json:"date_created"`
 	Oof_shard          string `json:"oof_shard"`
+}
+
+func (m *Model) Value() (driver.Value, error) {
+	return json.Marshal(m)
+}
+
+func (m *Model) Scan(value interface{}) error {
+	b, ok := value.([]byte)
+	if !ok {
+		return errors.New("type assertion to []byte failed")
+	}
+	return json.Unmarshal(b, &m)
 }

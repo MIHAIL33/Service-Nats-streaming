@@ -1,9 +1,12 @@
 package repository
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/MIHAIL33/Service-Nats-streaming/model"
+	"github.com/jmoiron/sqlx"
+)
 
 type Model interface {
-
+	Create(model models.Model) (models.Model, error)
 }
 
 type Repository struct {
@@ -11,5 +14,7 @@ type Repository struct {
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
-	return &Repository{}
+	return &Repository{
+		Model: NewModelRepository(db),
+	}
 }

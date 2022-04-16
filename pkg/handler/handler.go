@@ -20,10 +20,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		models := api.Group("/models")
 		{
-			models.POST("/", h.createModel)
-			models.GET("/", h.getAllModels)
-			models.GET("/:id", h.getModelById)
-			models.DELETE("/:id", h.deleteModel)
+			models.POST("", h.createModel)
+			models.GET("", h.getAllModels)
+			models.GET(":id", h.getModelById)
+			models.DELETE(":id", h.deleteModel)
 		}
 	}
 

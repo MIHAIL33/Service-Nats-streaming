@@ -47,3 +47,22 @@
   "date_created": "2021-11-26T06:22:19Z",
   "oof_shard": "1"
 }
+
+	// fmt.Println(res)
+	// fmt.Println(res2)
+	// var res Mod
+	// //var res2 Mod
+	// res.Model = model
+	// s, err := r.db.Exec("INSERT INTO models (model) VALUES($1) RETURNING *", res)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// fmt.Println()
+
+	// var res models.Model
+	// err := r.db.QueryRow("SELECT model FROM models LIMIT 1").Scan(&res)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// fmt.Println(res)

@@ -1,37 +1,37 @@
 package main
 
 import (
-	"log"
 	"os"
-
 	"github.com/MIHAIL33/Service-Nats-streaming"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/handler"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/repository"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/service"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
+	logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {
-		log.Fatalf("error initializing configs: %s", err.Error())
+		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error loading env variables: %s", err.Error())
+		logrus.Fatalf("error loading env variables: %s", err.Error())
 	}
 
 	db, err := repository.NewPostgresDB(repository.Config{
-		Host: viper.GetString("db.host"),
-		Port: viper.GetString("db.port"),
+		Host:     viper.GetString("db.host"),
+		Port:     viper.GetString("db.port"),
 		Username: viper.GetString("db.username"),
 		Password: os.Getenv("DB_PASSWORD"),
-		DBName: viper.GetString("db.dbname"),
-		SSLMode: viper.GetString("db.sslmode"),
+		DBName:   viper.GetString("db.dbname"),
+		SSLMode:  viper.GetString("db.sslmode"),
 	})
 	if err != nil {
-		log.Fatalf("failed to initialize postgres: %s", err.Error())
+		logrus.Fatalf("failed to initialize postgres: %s", err.Error())
 	}
 
 	repos := repository.NewRepository(db)
@@ -40,7 +40,7 @@ func main() {
 
 	srv := new(app.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		log.Fatalf("error occured while running http server: %s", err.Error())
+		logrus.Fatalf("error occured while running http server: %s", err.Error())
 	}
 }
 
