@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql/driver"
 	"encoding/json"
+
 	"github.com/sirupsen/logrus"
 )
 

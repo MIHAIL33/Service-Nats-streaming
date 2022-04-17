@@ -20,18 +20,40 @@ func NewModelRepository(db *sqlx.DB) *ModelRepository {
 	return &ModelRepository{ db: db }
 }
 
-func (r *ModelRepository) Create(model models.Model) (models.Model, error) {
+func (r *ModelRepository) Create(model models.Model) (*models.Model, error) {
 	createModelQuery := fmt.Sprintf("INSERT INTO %s (model) VALUES ($1) RETURNING *", modelsTable)
 	jsonModel, err := json.Marshal(model)
 	if err != nil {
-		return model, err
+		return nil, err
 	}
-	
+
 	var res models.Model
 	err = r.db.QueryRow(createModelQuery, jsonModel).Scan(&res)
 	if err != nil {
-		return model, err
+		return nil, err
 	}
 
-	return res, nil
+	return &res, nil
+}
+
+func (r *ModelRepository) GetById(id string) (*models.Model, error) {
+	getModelQuery := fmt.Sprintf("SELECT * FROM %s WHERE model->>'order_uid' = $1", modelsTable)
+	var res models.Model
+	err := r.db.QueryRow(getModelQuery, id).Scan(&res)
+	if err != nil {
+		return nil, err 
+	}
+
+	return &res, nil
+}
+
+func (r *ModelRepository) GetAll() (*[]models.Model, error) {
+	getAllModelQuery := fmt.Sprintf("SELECT * FROM %s", modelsTable)
+	var res []models.Model
+	err := r.db.Select(&res, getAllModelQuery)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }

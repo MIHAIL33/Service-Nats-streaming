@@ -7,8 +7,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type createModelResponse struct {
-	Data models.Model `json:"data"`
+type getAllModelResponse struct {
+	Data *[]models.Model `json:"data"`
 }
 
 func (h *Handler) createModel(c *gin.Context) {
@@ -24,17 +24,35 @@ func (h *Handler) createModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, createModelResponse{
-		Data: model,
-	})
+	c.JSON(http.StatusOK, model)
 }
 
 func (h *Handler) getAllModels(c *gin.Context) {
+	models, err := h.services.GetAll()
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
+	c.JSON(http.StatusOK, getAllModelResponse{
+		Data: models,
+	})
 }
 
 func (h *Handler) getModelById(c *gin.Context) {
+	modelId := c.Param("id")
+	if modelId == "" {
+		newErrorResponse(c, http.StatusBadRequest, "invalid param")
+		return
+	}
 
+	model, err := h.services.Model.GetById(modelId)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return 
+	}
+
+	c.JSON(http.StatusOK, model)
 }
 
 func (h *Handler) deleteModel(c *gin.Context) {

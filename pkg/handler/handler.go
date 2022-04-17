@@ -18,7 +18,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	api := router.Group("/api")
 	{
-		models := api.Group("/models")
+		models := api.Group("models")
 		{
 			models.POST("", h.createModel)
 			models.GET("", h.getAllModels)
