@@ -39,6 +39,16 @@ func (h *Handler) createModel(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+// @Summary GetAll
+// @Tags API
+// @Description Get all model
+// @Accept json
+// @Produce json
+// @Success 200 {object} []models.Model
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/models [get]
 func (h *Handler) getAllModels(c *gin.Context) {
 	models, err := h.services.GetAll()
 	if err != nil {
@@ -51,6 +61,17 @@ func (h *Handler) getAllModels(c *gin.Context) {
 	})
 }
 
+// @Summary GetById
+// @Tags API
+// @Description Get model by order_uid
+// @Accept json
+// @Produce json
+// @Param id path string true "order_uid"
+// @Success 200 {object} models.Model
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/models/{id} [get]
 func (h *Handler) getModelById(c *gin.Context) {
 	modelId := c.Param("id")
 	if modelId == "" {
@@ -67,6 +88,17 @@ func (h *Handler) getModelById(c *gin.Context) {
 	c.JSON(http.StatusOK, model)
 }
 
+// @Summary Delete
+// @Tags API
+// @Description delete model by order_uid
+// @Accept json
+// @Produce json
+// @Param id path string true "order_uid"
+// @Success 200 {object} models.Model
+// @Failure 400,404 {object} errorResponse
+// @Failure 500 {object} errorResponse
+// @Failure default {object} errorResponse
+// @Router /api/models/{id} [delete]
 func (h *Handler) deleteModel(c *gin.Context) {
 	modelId := c.Param("id")
 	if modelId == "" {
