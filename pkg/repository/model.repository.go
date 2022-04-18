@@ -57,3 +57,14 @@ func (r *ModelRepository) GetAll() (*[]models.Model, error) {
 
 	return &res, nil
 }
+
+func (r* ModelRepository) Delete(id string) (*models.Model, error) {
+	deleteModelQuery := fmt.Sprintf("DELETE FROM %s WHERE model->>'order_uid' = $1 RETURNING *", modelsTable)
+	var res models.Model
+	err := r.db.QueryRow(deleteModelQuery, id).Scan(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}

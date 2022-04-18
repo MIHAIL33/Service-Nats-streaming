@@ -1,0 +1,188 @@
+basePath: /
+definitions:
+  handler.errorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  models.Model:
+    properties:
+      customer_id:
+        type: string
+      date_created:
+        type: string
+      delivery:
+        properties:
+          address:
+            type: string
+          city:
+            type: string
+          email:
+            type: string
+          name:
+            type: string
+          phone:
+            type: string
+          region:
+            type: string
+          zip:
+            type: string
+        required:
+        - address
+        - city
+        - email
+        - name
+        - phone
+        - region
+        - zip
+        type: object
+      delivery_service:
+        type: string
+      entry:
+        type: string
+      internal_signature:
+        type: string
+      items:
+        items:
+          properties:
+            brand:
+              type: string
+            chrt_id:
+              type: integer
+            name:
+              type: string
+            nm_id:
+              type: integer
+            price:
+              type: integer
+            rid:
+              type: string
+            sale:
+              type: integer
+            size:
+              type: string
+            status:
+              type: integer
+            total_price:
+              type: integer
+            track_number:
+              type: string
+          required:
+          - brand
+          - chrt_id
+          - name
+          - nm_id
+          - price
+          - rid
+          - sale
+          - size
+          - status
+          - total_price
+          - track_number
+          type: object
+        type: array
+      locale:
+        type: string
+      oof_shard:
+        type: string
+      order_uid:
+        type: string
+      payment:
+        properties:
+          amount:
+            type: integer
+          bank:
+            type: string
+          currency:
+            type: string
+          custom_fee:
+            type: integer
+          delivery_cost:
+            type: integer
+          goods_total:
+            type: integer
+          payment_dt:
+            type: integer
+          provider:
+            type: string
+          request_id:
+            type: string
+          transaction:
+            type: string
+        required:
+        - amount
+        - bank
+        - currency
+        - delivery_cost
+        - goods_total
+        - payment_dt
+        - provider
+        - transaction
+        type: object
+      shardkey:
+        type: string
+      sm_id:
+        type: integer
+      track_number:
+        type: string
+    required:
+    - customer_id
+    - date_created
+    - delivery
+    - delivery_service
+    - entry
+    - items
+    - locale
+    - oof_shard
+    - order_uid
+    - payment
+    - shardkey
+    - sm_id
+    - track_number
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: L0 task, service with Nats-streaming
+  title: L0
+  version: "1.0"
+paths:
+  /api/models:
+    post:
+      consumes:
+      - application/json
+      description: Create new model
+      parameters:
+      - description: model info
+        in: body
+        name: model
+        required: true
+        schema:
+          $ref: '#/definitions/models.Model'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Model'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/handler.errorResponse'
+      summary: Create
+      tags:
+      - API
+swagger: "2.0"

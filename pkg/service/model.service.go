@@ -34,3 +34,7 @@ func (s *ModelService) GetById(id string) (*models.Model, error) {
 func (s *ModelService) GetAll() (*[]models.Model, error) {
 	return s.repo.GetAll()
 }
+
+func (s *ModelService) Delete(id string) (*models.Model, error) {
+	return s.repo.Delete(id)
+} 

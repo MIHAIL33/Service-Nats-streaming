@@ -9,6 +9,7 @@ type Model interface {
 	Create(model models.Model) (*models.Model, error)
 	GetById(id string) (*models.Model, error)
 	GetAll() (*[]models.Model, error)
+	Delete(id string) (*models.Model, error)
 }
 
 type Repository struct {
