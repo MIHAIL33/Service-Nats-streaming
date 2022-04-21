@@ -10,8 +10,10 @@ import (
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/handler"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/repository"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/service"
+	"github.com/MIHAIL33/Service-Nats-streaming/pkg/stream"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/nats-io/stan.go"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -45,9 +47,14 @@ func main() {
 		logrus.Fatalf("failed to initialize postgres: %s", err.Error())
 	}
 
+	sc, _ := stan.Connect(viper.GetString("nats.clusterID"), viper.GetString("nats.clientSubscriber"), stan.NatsURL(viper.GetString("nats.serverURL")))
+	defer sc.Close()
+
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
+	streams := stream.NewStream(sc, services)
+	stream.Streaming(streams)
 
 	srv := new(app.Server)
 	go func() {

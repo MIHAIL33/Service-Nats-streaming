@@ -1,3 +1,7 @@
 # Environment file
 /.devcontainer/.env
 .env
+
+# Compiler file
+main
+producer

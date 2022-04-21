@@ -1,7 +1,6 @@
 package models
 
 import (
-	"database/sql/driver"
 	"encoding/json"
 
 	"github.com/sirupsen/logrus"
@@ -58,10 +57,6 @@ type Model struct {
 	Sm_id              int    `json:"sm_id" binding:"required"`
 	Date_created       string `json:"date_created" binding:"required"`
 	Oof_shard          string `json:"oof_shard" binding:"required"`
-}
-
-func (m *Model) Value() (driver.Value, error) {
-	return json.Marshal(m)
 }
 
 func (m *Model) Scan(value interface{}) error {

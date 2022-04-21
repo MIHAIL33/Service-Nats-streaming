@@ -6,3 +6,18 @@ db:
   username: "root"
   dbname: "train-l0"
   sslmode: "disable"
+
+nats:
+  serverURL: "nats://localhost:4222"
+  clusterID: "test-cluster"
+  clientProducer: "producer"
+  clientSubscriber: "subscriber"
+  subject: "model"
+
+model:
+  jsonFilePath: "task/model.json"
+
+
+
+#http://localhost:8222/streaming/serverz
+#export PATH=$(go env GOPATH)/bin:$PATH

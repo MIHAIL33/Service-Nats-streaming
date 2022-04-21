@@ -12,6 +12,8 @@ require (
 	github.com/lib/pq v1.2.0
 	github.com/magiconair/properties v1.8.6 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/nats-io/nats.go v1.14.0 // indirect
+	github.com/nats-io/stan.go v0.10.2 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/afero v1.8.2 // indirect
 	github.com/spf13/viper v1.10.1
