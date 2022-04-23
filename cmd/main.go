@@ -7,6 +7,7 @@ import (
 	"syscall"
 
 	"github.com/MIHAIL33/Service-Nats-streaming"
+	"github.com/MIHAIL33/Service-Nats-streaming/pkg/cache"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/handler"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/repository"
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/service"
@@ -51,8 +52,18 @@ func main() {
 	defer sc.Close()
 
 	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
+	
+	cache := cache.NewCache()
+
+	services := service.NewService(repos, cache)
+
+	err = services.AddAllInCache()
+	if err != nil {
+		logrus.Fatalf("failed to load cache: %s", err.Error())
+	}
+
 	handlers := handler.NewHandler(services)
+	
 	streams := stream.NewStream(sc, services)
 	stream.Streaming(streams)
 

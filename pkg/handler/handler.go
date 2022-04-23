@@ -26,6 +26,13 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	{
 		models := api.Group("models")
 		{
+
+			cache := models.Group("cache")
+			{
+				cache.GET("", h.getAllModelsFromCache)
+				cache.GET(":id", h.getModelFromCacheById)
+			}
+
 			models.POST("", h.createModel)
 			models.GET("", h.getAllModels)
 			models.GET(":id", h.getModelById)
