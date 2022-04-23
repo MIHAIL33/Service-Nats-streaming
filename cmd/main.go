@@ -64,8 +64,7 @@ func main() {
 
 	handlers := handler.NewHandler(services)
 	
-	streams := stream.NewStream(sc, services)
-	stream.Streaming(streams)
+	stream.NewStream(sc, services)
 
 	srv := new(app.Server)
 	go func() {

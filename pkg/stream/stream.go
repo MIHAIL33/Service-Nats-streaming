@@ -11,12 +11,14 @@ type Stream struct {
 }
 
 func NewStream(sc stan.Conn, services *service.Service) *Stream {
-	return &Stream{
+	st := &Stream{
 		sc: sc,
 		services: services,
 	}
+	st.Streaming()
+	return st
 }
 
-func Streaming(s *Stream) {
+func (s *Stream) Streaming() {
 	s.getModel()
 }
