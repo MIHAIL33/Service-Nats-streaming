@@ -3,6 +3,8 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http/httptest"
 	"testing"
 
@@ -74,6 +76,308 @@ func TestHandler_createModel(t *testing.T) {
 
 			w := httptest.NewRecorder()
 			req := httptest.NewRequest("POST", "/models", bytes.NewBufferString(testCase.inputBody))
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_getAllModels(t *testing.T) {
+	type mockBehavior func (r *mock_service.MockModel)
+
+	var jsonOutput string = "{\"data\":[{\"order_uid\":\"b563feb7b2b84b6test\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"},{\"order_uid\":\"b563feb7b2b84b6test\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"}]}"
+	var modelOutput *[]models.Model
+	err := json.Unmarshal([]byte(jsonOutput), &modelOutput)
+	if err != nil {
+		return
+	}
+
+
+	testTable := []struct {
+		name string
+		mockBehavior mockBehavior
+		expectedStatusCode int
+		expectedRequestBody string
+	} {
+		{
+			name: "OK",
+			mockBehavior: func(s *mock_service.MockModel) {
+				s.EXPECT().GetAll().Return(modelOutput, nil)
+			},
+			expectedStatusCode: 200,
+			expectedRequestBody: jsonOutput,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			repo := mock_service.NewMockModel(c)
+			testCase.mockBehavior(repo)
+
+			services := &service.Service{Model: repo}
+			handler := NewHandler(services)
+
+			r := gin.New()
+			r.GET("/models", handler.getAllModels)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/models", nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_getModelById(t *testing.T) {
+	type mockBehavior func(r *mock_service.MockModel, id string)
+
+	var jsonOutput string = "{\"order_uid\":\"1\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"}"
+	var modelOutput *models.Model
+	err := json.Unmarshal([]byte(jsonOutput), &modelOutput)
+	if err != nil {
+		return
+	}
+
+	testTable := []struct {
+		name string
+		inputParam string
+		mockBehavior mockBehavior
+		expectedStatusCode int
+		expectedRequestBody string
+	} {
+		{
+			name: "OK",
+			inputParam: "1",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().GetById(id).Return(modelOutput, nil)
+			},
+			expectedStatusCode: 200,
+			expectedRequestBody: jsonOutput,
+		},
+		{
+			name: "Not found id",
+			inputParam: "2",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().GetById(id).Return(nil, errors.New("sql: no rows in result set"))
+			},
+			//need to rewrite the entire error system with the addition of code status
+			expectedStatusCode: 500,
+			expectedRequestBody: `{"message":"sql: no rows in result set"}`,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			repo := mock_service.NewMockModel(c)
+			testCase.mockBehavior(repo, testCase.inputParam)
+
+			services := &service.Service{Model: repo}
+			handler := NewHandler(services)
+
+			r := gin.New()
+
+			url := fmt.Sprintf("/models/%s", testCase.inputParam)
+
+			r.GET("/models/:id", handler.getModelById)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", url, nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_deleteModel(t *testing.T) {
+	type mockBehavior func(r *mock_service.MockModel, id string)
+
+	var jsonOutput string = "{\"order_uid\":\"1\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"}"
+	var modelOutput *models.Model
+	err := json.Unmarshal([]byte(jsonOutput), &modelOutput)
+	if err != nil {
+		return
+	}
+
+	testTable := []struct {
+		name string
+		inputParam string
+		mockBehavior mockBehavior
+		expectedStatusCode int
+		expectedRequestBody string
+	} {
+		{
+			name: "OK",
+			inputParam: "1",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().Delete(id).Return(modelOutput, nil)
+			},
+			expectedStatusCode: 200,
+			expectedRequestBody: jsonOutput,
+		},
+		{
+			name: "Not found id",
+			inputParam: "2",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().Delete(id).Return(nil, errors.New("sql: no rows in result set"))
+			},
+			//need to rewrite the entire error system with the addition of code status
+			expectedStatusCode: 500,
+			expectedRequestBody: `{"message":"sql: no rows in result set"}`,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			repo := mock_service.NewMockModel(c)
+			testCase.mockBehavior(repo, testCase.inputParam)
+
+			services := &service.Service{Model: repo}
+			handler := NewHandler(services)
+
+			r := gin.New()
+
+			url := fmt.Sprintf("/models/%s", testCase.inputParam)
+
+			r.DELETE("/models/:id", handler.deleteModel)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("DELETE", url, nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_getAllModelsFromCache(t * testing.T) {
+	type mockBehavior func (r *mock_service.MockModel)
+
+	var jsonOutput string = "{\"data\":[{\"order_uid\":\"b563feb7b2b84b6test\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"},{\"order_uid\":\"b563feb7b2b84b6test\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"}]}"
+	var modelOutput *[]models.Model
+	err := json.Unmarshal([]byte(jsonOutput), &modelOutput)
+	if err != nil {
+		return
+	}
+
+
+	testTable := []struct {
+		name string
+		mockBehavior mockBehavior
+		expectedStatusCode int
+		expectedRequestBody string
+	} {
+		{
+			name: "OK",
+			mockBehavior: func(s *mock_service.MockModel) {
+				s.EXPECT().GetAllFromCache().Return(modelOutput, nil)
+			},
+			expectedStatusCode: 200,
+			expectedRequestBody: jsonOutput,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			repo := mock_service.NewMockModel(c)
+			testCase.mockBehavior(repo)
+
+			services := &service.Service{Model: repo}
+			handler := NewHandler(services)
+
+			r := gin.New()
+			r.GET("/models/cache", handler.getAllModelsFromCache)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", "/models/cache", nil)
+
+			r.ServeHTTP(w, req)
+
+			assert.Equal(t, testCase.expectedStatusCode, w.Code)
+			assert.Equal(t, testCase.expectedRequestBody, w.Body.String())
+		})
+	}
+}
+
+func TestHandler_getModelFromCacheById(t *testing.T) {
+	type mockBehavior func(r *mock_service.MockModel, id string)
+
+	var jsonOutput string = "{\"order_uid\":\"1\",\"track_number\":\"WBILMTESTTRACK\",\"entry\":\"WBIL\",\"delivery\":{\"name\":\"Test Testov\",\"phone\":\"+9720000000\",\"zip\":\"2639809\",\"city\":\"Kiryat Mozkin\",\"address\":\"Ploshad Mira 15\",\"region\":\"Kraiot\",\"email\":\"test@gmail.com\"},\"payment\":{\"transaction\":\"b563feb7b2b84b6test\",\"request_id\":\"\",\"currency\":\"USD\",\"provider\":\"wbpay\",\"amount\":1817,\"payment_dt\":1637907727,\"bank\":\"alpha\",\"delivery_cost\":1500,\"goods_total\":317,\"custom_fee\":0},\"items\":[{\"chrt_id\":9934930,\"track_number\":\"WBILMTESTTRACK\",\"price\":453,\"rid\":\"ab4219087a764ae0btest\",\"name\":\"Mascaras\",\"sale\":30,\"size\":\"0\",\"total_price\":317,\"nm_id\":2389212,\"brand\":\"Vivienne Sabo\",\"status\":202}],\"locale\":\"en\",\"internal_signature\":\"\",\"customer_id\":\"test\",\"delivery_service\":\"meest\",\"shardkey\":\"9\",\"sm_id\":99,\"date_created\":\"2021-11-26T06:22:19Z\",\"oof_shard\":\"1\"}"
+	var modelOutput *models.Model
+	err := json.Unmarshal([]byte(jsonOutput), &modelOutput)
+	if err != nil {
+		return
+	}
+
+	testTable := []struct {
+		name string
+		inputParam string
+		mockBehavior mockBehavior
+		expectedStatusCode int
+		expectedRequestBody string
+	} {
+		{
+			name: "OK",
+			inputParam: "1",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().GetModelFromCacheById(id).Return(modelOutput, nil)
+			},
+			expectedStatusCode: 200,
+			expectedRequestBody: jsonOutput,
+		},
+		{
+			name: "Not found id",
+			inputParam: "2",
+			mockBehavior: func(s *mock_service.MockModel, id string) {
+				s.EXPECT().GetModelFromCacheById(id).Return(nil, errors.New("Not found model with order_uid = 2"))
+			},
+			//need to rewrite the entire error system with the addition of code status
+			expectedStatusCode: 500,
+			expectedRequestBody: `{"message":"Not found model with order_uid = 2"}`,
+		},
+	}
+
+	for _, testCase := range testTable {
+		t.Run(testCase.name, func(t *testing.T) {
+			c := gomock.NewController(t)
+			defer c.Finish()
+
+			repo := mock_service.NewMockModel(c)
+			testCase.mockBehavior(repo, testCase.inputParam)
+
+			services := &service.Service{Model: repo}
+			handler := NewHandler(services)
+
+			r := gin.New()
+
+			url := fmt.Sprintf("/models/cache/%s", testCase.inputParam)
+
+			r.GET("/models/cache/:id", handler.getModelFromCacheById)
+
+			w := httptest.NewRecorder()
+			req := httptest.NewRequest("GET", url, nil)
 
 			r.ServeHTTP(w, req)
 
