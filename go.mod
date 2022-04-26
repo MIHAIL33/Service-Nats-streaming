@@ -7,6 +7,7 @@ require (
 	github.com/go-openapi/spec v0.20.5 // indirect
 	github.com/go-openapi/swag v0.21.1 // indirect
 	github.com/go-playground/validator/v10 v10.10.1 // indirect
+	github.com/golang/mock v1.6.0 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/joho/godotenv v1.4.0
 	github.com/lib/pq v1.2.0
@@ -25,6 +26,7 @@ require (
 	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
 	golang.org/x/sys v0.0.0-20220422013727-9388b58f7150 // indirect
 	golang.org/x/tools v0.1.10 // indirect
+	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
 )

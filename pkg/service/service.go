@@ -6,6 +6,8 @@ import (
 	"github.com/MIHAIL33/Service-Nats-streaming/pkg/cache"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Model interface {
 	Create(model models.Model) (*models.Model, error)
 	GetById(id string) (*models.Model, error)
