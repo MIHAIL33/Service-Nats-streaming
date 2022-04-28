@@ -13,7 +13,7 @@ The script reads the `./task/model.json` file and writes it to the Nats-streamin
 
 ### main
 ```
-go build ./cmd/producer.go
+go build ./cmd/main.go
 ```
 The script starts the server, reads data from the database, and writes the data to the cache. Starts the Nats-streaming channel listener, reads data from there, writing it to the cache and database.
 
