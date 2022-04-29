@@ -2,7 +2,6 @@ package repository
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"testing"
 
@@ -45,23 +44,12 @@ func TestModelRepository_Create(t *testing.T) {
 			input:  modelInput,
 			output: modelInput,
 			mockBehavior: func(model models.Model) {
-				// createModelQuery := fmt.Sprintf(`INSERT INTO %s (model) VALUES(%s) RETURNING *`, modelsTable, jsonInput)
-				// mock.ExpectQuery(createModelQuery)
-				fmt.Println(model)
 				jsonModel, err := json.Marshal(model)
 				if err != nil {
 				 	return
 				}
-				fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-				//rows := sqlmock.NewRows([]string{"id"}).AddRow(1)
-				//mock.ExpectQuery("INSERT INTO users").WithArgs("first_name", "last_name", "username", "password").WillReturnRows(rows)
-				//rows := sqlmock.NewRows([]string{"model"})
-				//mock.ExpectQuery("INSERT INTO models").WithArgs(jsonModel).WillReturnRows(rows)
-				//row := sqlmock.NewRows([]string{"model"}).AddRow("model")
-				//mock.ExpectQuery(`INSERT INTO models`).WithArgs(out).WillReturnRows(row)
-				mock.ExpectExec(`INSERT INTO models`).WithArgs(jsonModel).WillReturnResult(sqlmock.NewResult(1, 1))
-				//fmt.Println(row)
-				//mock.ExpectQuery(`INSERT INTO models`).WithArgs("model").WillReturnResult(sqlmock.NewResult(0, 1))
+				row := sqlmock.NewRows([]string{"model"}).AddRow(jsonModel)
+				mock.ExpectQuery(`INSERT INTO models`).WithArgs(jsonModel).WillReturnRows(row)
 			},
 			wantErr: false,
 		},
@@ -72,10 +60,6 @@ func TestModelRepository_Create(t *testing.T) {
 			testCase.mockBehavior(testCase.input)
 
 			got, err := r.Create(testCase.input)
-
-			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-			fmt.Println(got)
-			fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 			if testCase.wantErr {
 				assert.Error(t, err)
