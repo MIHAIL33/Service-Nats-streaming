@@ -18,7 +18,7 @@ func NewCacheModel() *CacheModel {
 }
 
 func (cm *CacheModel) AddAll(models *[]models.Model) error {
-	cm.models = models
+	*cm.models = *models
 	return nil
 }
 
